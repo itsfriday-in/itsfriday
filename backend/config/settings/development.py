@@ -35,24 +35,3 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 #         "LOCATION": "unique-snowflake",
 #     }
 # }
-
-# =============================================================================
-# Debug Toolbar (if installed)
-# =============================================================================
-
-try:
-    import debug_toolbar  # noqa: F401
-
-    INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
-    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
-    INTERNAL_IPS = ["127.0.0.1"]
-except ImportError:
-    pass
-
-# =============================================================================
-# Logging (More verbose in development)
-# =============================================================================
-
-LOGGING["loggers"]["django"]["level"] = "DEBUG"  # noqa: F405
-LOGGING["loggers"]["api"]["level"] = "DEBUG"  # noqa: F405
-LOGGING["loggers"]["core"]["level"] = "DEBUG"  # noqa: F405

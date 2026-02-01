@@ -1,6 +1,18 @@
 """
-Django settings package.
+Django settings package for apilens project.
 
-Import settings based on DJANGO_SETTINGS_MODULE environment variable.
-Default: config.settings.development
+Usage:
+    - Development: DJANGO_SETTINGS_MODULE=config.settings.development
+    - Production:  DJANGO_SETTINGS_MODULE=config.settings.production
+
+Default is development settings.
 """
+
+import os
+
+environment = os.environ.get("DJANGO_ENV", "development").lower()
+
+if environment == "production":
+    from .production import *  # noqa: F401, F403
+else:
+    from .development import *  # noqa: F401, F403

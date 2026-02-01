@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "apilens",
+  "name": "apiLens",
   "favicon": "/images/favicon.svg",
   "colors": {
     "primary": "#0D9373",
@@ -11,12 +11,12 @@
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:support@apilens.in"
+      "url": "mailto:support@apilens.ai"
     }
   ],
   "topbarCtaButton": {
     "name": "Dashboard",
-    "url": "https://app.apilens.in"
+    "url": "https://app.apilens.ai"
   },
   "tabs": [
     {
@@ -28,57 +28,20 @@
     {
       "name": "GitHub",
       "icon": "github",
-      "url": "https://github.com/apilens-in/apilens"
-    },
-    {
-      "name": "Community",
-      "icon": "discord",
-      "url": "https://discord.gg/apilens"
+      "url": "https://github.com/apilens/apilens"
     }
   ],
   "navigation": {
-    "groups":[
+    "groups": [
       {
         "group": "Getting Started",
         "pages": [
-          "getting-started/introduction",
-          "getting-started/quickstart",
-          "getting-started/installation"
-        ]
-      },
-      {
-        "group": "Guides",
-        "pages": [
-          "guides/sending-metrics",
-          "guides/collecting-logs",
-          "guides/distributed-tracing",
-          "guides/creating-dashboards"
-        ]
-      },
-      {
-        "group": "Self-Hosting",
-        "pages": [
-          "self-hosting/requirements",
-          "self-hosting/docker-compose",
-          "self-hosting/production-deployment",
-          "self-hosting/configuration"
-        ]
-      },
-      {
-        "group": "API Reference",
-        "pages": [
-          "api-reference/introduction",
-          "api-reference/authentication",
-          "api-reference/metrics",
-          "api-reference/logs",
-          "api-reference/traces"
+          "getting-started/introduction"
         ]
       }
     ]
   },
   "footerSocials": {
-    "twitter": "https://twitter.com/apilensin",
-    "github": "https://github.com/apilens-in/apilens",
-    "linkedin": "https://linkedin.com/company/apilens"
+    "github": "https://github.com/apilens/apilens"
   }
 }

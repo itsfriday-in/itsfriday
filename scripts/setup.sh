@@ -1,1 +1,0 @@
-# Full setup (backend + frontend)
