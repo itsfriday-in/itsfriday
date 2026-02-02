@@ -37,7 +37,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://apilens.ai"
+      "href": "https://app.apilens.ai"
     }
   },
   "contextual": {
