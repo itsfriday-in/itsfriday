@@ -2,13 +2,63 @@
 
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { Search, Bell, LogOut, Settings } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+
+// Validate if picture is a valid displayable image
+// Only base64 data URLs are valid (user-uploaded pictures)
+function isValidPictureUrl(url: string | undefined): boolean {
+  if (!url || typeof url !== 'string' || url.length === 0) {
+    return false;
+  }
+  return url.startsWith('data:image/');
+}
+
+// Get initials from name (first + last name initials)
+function getInitials(name?: string | null, email?: string | null): string {
+  if (name) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return parts[0].charAt(0).toUpperCase();
+    }
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+  if (email) {
+    return email.charAt(0).toUpperCase();
+  }
+  return "U";
+}
+
+interface UserProfile {
+  name: string;
+  email: string;
+  picture?: string;
+}
 
 export default function Navbar() {
-  const { user } = useUser();
+  const { user, isLoading } = useUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch normalized profile from API
+  const fetchProfile = useCallback(async () => {
+    try {
+      const response = await fetch("/api/account/profile");
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data.profile);
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      fetchProfile();
+    }
+  }, [isLoading, user, fetchProfile]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -19,6 +69,18 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Reset image error when profile picture changes
+  useEffect(() => {
+    setImgError(false);
+  }, [profile?.picture]);
+
+  // Only use normalized profile data - don't fall back to session user (which has social provider data)
+  const isProfileLoaded = profile !== null;
+  const displayName = profile?.name || '';
+  const displayEmail = profile?.email || user?.email || '';
+  const displayPicture = profile?.picture;
+  const hasValidPicture = isValidPictureUrl(displayPicture);
 
   return (
     <header className="navbar">
@@ -46,12 +108,16 @@ export default function Navbar() {
             onClick={() => setDropdownOpen(!dropdownOpen)}
           >
             <div className="user-avatar-gradient">
-              {user?.picture && !imgError ? (
+              {hasValidPicture && !imgError ? (
                 <img
-                  src={user.picture}
-                  alt={user.name || "User"}
+                  src={displayPicture}
+                  alt={displayName || "User"}
                   onError={() => setImgError(true)}
                 />
+              ) : isProfileLoaded ? (
+                <span className="user-avatar-initials">
+                  {getInitials(displayName, displayEmail)}
+                </span>
               ) : null}
             </div>
           </button>
@@ -59,8 +125,8 @@ export default function Navbar() {
           {dropdownOpen && (
             <div className="dropdown-menu">
               <div className="dropdown-header">
-                <p className="dropdown-user-name">{user?.name}</p>
-                <p className="dropdown-user-email">{user?.email}</p>
+                <p className="dropdown-user-name">{displayName || displayEmail.split('@')[0]}</p>
+                <p className="dropdown-user-email">{displayEmail}</p>
               </div>
               <div className="dropdown-divider" />
               <a href="/settings" className="dropdown-item">

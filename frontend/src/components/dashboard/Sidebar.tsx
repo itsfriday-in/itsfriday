@@ -15,11 +15,8 @@ import {
   CircleHelpIcon,
   PanelLeftClose,
   PanelLeft,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { useSidebar } from "@/components/providers/SidebarProvider";
-import { useTheme } from "@/components/providers/ThemeProvider";
 
 const navigation = [
   { name: "Overview", href: "/", icon: Home },
@@ -39,7 +36,6 @@ const secondaryNavigation = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { collapsed, toggleSidebar } = useSidebar();
-  const { theme, toggleTheme } = useTheme();
 
   return (
     <aside className={`sidebar ${collapsed ? "sidebar-collapsed" : ""}`}>
@@ -54,7 +50,7 @@ export default function Sidebar() {
               className="logo-icon-collapsed"
             />
           ) : (
-            <span className="logo-text">ApiLens</span>
+            <span className="logo-text">API Lens</span>
           )}
         </Link>
       </div>
@@ -105,15 +101,6 @@ export default function Sidebar() {
 
       <div className="sidebar-footer">
         <div className="sidebar-actions">
-          <button
-            className="sidebar-action-btn"
-            onClick={toggleTheme}
-            title={theme === "dark" ? "Light Mode" : "Dark Mode"}
-          >
-            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-            {!collapsed && <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>}
-          </button>
-
           <button
             className="sidebar-action-btn"
             onClick={toggleSidebar}
