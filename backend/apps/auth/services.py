@@ -36,6 +36,10 @@ def _hash_token(raw_token: str) -> str:
 
 class TokenService:
     @staticmethod
+    def _normalized_device(device_info: str) -> str:
+        return (device_info or "").strip()[:255]
+
+    @staticmethod
     def create_access_token(
         user: User, token_family: str | None = None, auth_method: str | None = None,
     ) -> str:
@@ -61,13 +65,15 @@ class TokenService:
     ) -> tuple[str, str]:
         raw_token = secrets.token_urlsafe(48)
         lifetime = REFRESH_TOKEN_LIFETIME if remember_me else REFRESH_TOKEN_SESSION_LIFETIME
+        normalized_device = TokenService._normalized_device(device_info)
 
-        # Revoke existing tokens from the same device + IP to avoid duplicates
-        if device_info and ip_address:
-            RefreshToken.objects.for_user(user).filter(
-                device_info=device_info[:255],
-                ip_address=ip_address,
-            ).update(is_revoked=True)
+        # Revoke existing tokens from the same device to avoid duplicate entries in
+        # active sessions. If device info is missing, fall back to IP-only dedupe.
+        existing = RefreshToken.objects.for_user(user)
+        if normalized_device:
+            existing.filter(device_info=normalized_device).update(is_revoked=True)
+        elif ip_address:
+            existing.filter(ip_address=ip_address).update(is_revoked=True)
 
         location = resolve_location(ip_address)
 
@@ -75,7 +81,7 @@ class TokenService:
             user=user,
             token_hash=_hash_token(raw_token),
             expires_at=timezone.now() + lifetime,
-            device_info=device_info[:255],
+            device_info=normalized_device,
             ip_address=ip_address,
             location=location,
         )
@@ -157,10 +163,21 @@ class TokenService:
 
     @staticmethod
     def get_active_sessions(user: User) -> list[RefreshToken]:
-        return list(
+        # One visible session per device/IP fingerprint (latest activity wins).
+        # This keeps the UI clean even if historical active rows exist.
+        rows = (
             RefreshToken.objects.for_user(user)
             .order_by("-last_used_at")
         )
+        seen_fingerprints: set[str] = set()
+        result: list[RefreshToken] = []
+        for row in rows:
+            fingerprint = f"{TokenService._normalized_device(row.device_info)}|{row.ip_address or ''}"
+            if fingerprint in seen_fingerprints:
+                continue
+            seen_fingerprints.add(fingerprint)
+            result.append(row)
+        return result
 
     @staticmethod
     def cleanup_expired() -> int:

@@ -18,6 +18,7 @@ from .schemas import (
     EndpointTimeseriesPointResponse,
     EndpointConsumerResponse,
     EndpointStatusCodeResponse,
+    EndpointPayloadSampleResponse,
     CreateApiKeyRequest,
     CreateAppRequest,
     CreateEndpointRequest,
@@ -556,6 +557,32 @@ def get_analytics_endpoint_status_codes(
 
     from apps.projects.services import AnalyticsService
     return AnalyticsService.get_endpoint_status_codes(
+        app_id=str(app.id),
+        method=method,
+        path=path,
+        environment=environment,
+        since=since,
+        until=until,
+        limit=limit,
+    )
+
+
+@router.get("/{app_slug}/analytics/endpoint-payloads", response=list[EndpointPayloadSampleResponse])
+def get_analytics_endpoint_payloads(
+    request: HttpRequest,
+    app_slug: str,
+    method: str,
+    path: str,
+    environment: str = None,
+    since: str = None,
+    until: str = None,
+    limit: int = 20,
+):
+    user: User = request.auth
+    app = AppService.get_app_by_slug(user, app_slug)
+
+    from apps.projects.services import AnalyticsService
+    return AnalyticsService.get_endpoint_payloads(
         app_id=str(app.id),
         method=method,
         path=path,

@@ -15,6 +15,8 @@ class RequestRecord(Schema):
     response_size: int = 0
     ip_address: str = ""
     user_agent: str = ""
+    request_payload: str = ""
+    response_payload: str = ""
 
 
 class IngestRequest(Schema):

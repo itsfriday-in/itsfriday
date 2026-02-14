@@ -26,7 +26,9 @@ description: 'Send API request telemetry to APILens using app-scoped API keys.'
       "request_size": 512,
       "response_size": 1024,
       "ip_address": "203.0.113.10",
-      "user_agent": "checkout-service"
+      "user_agent": "checkout-service",
+      "request_payload": "{\"sku\":\"sku_123\",\"qty\":1}",
+      "response_payload": "{\"order_id\":\"ord_123\",\"status\":\"created\"}"
     }
   ]
 }
@@ -45,6 +47,7 @@ description: 'Send API request telemetry to APILens using app-scoped API keys.'
 - Endpoint metadata is auto-created or updated from ingest events
 - Unsupported endpoint methods are still ingested as raw events
 - Environment is queryable in dashboard analytics filters
+- Optional request/response payload samples are captured when provided
 
 ## Failure Modes
 

@@ -149,6 +149,18 @@ export interface EndpointStatusCode {
   total_requests: number;
 }
 
+export interface EndpointPayloadSample {
+  timestamp: string;
+  method: string;
+  path: string;
+  status_code: number;
+  environment: string;
+  ip_address: string;
+  user_agent: string;
+  request_payload: string;
+  response_payload: string;
+}
+
 async function fetchDjango<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -619,6 +631,23 @@ export const apiClient = {
     const qs = searchParams.toString();
     return fetchDjango<EndpointStatusCode[]>(
       `/apps/${slug}/analytics/endpoint-status-codes${qs ? `?${qs}` : ""}`,
+    );
+  },
+
+  async getEndpointPayloads(
+    slug: string,
+    params: { method: string; path: string; environment?: string; since?: string; until?: string; limit?: number },
+  ): Promise<ApiResponse<EndpointPayloadSample[]>> {
+    const searchParams = new URLSearchParams();
+    searchParams.set("method", params.method);
+    searchParams.set("path", params.path);
+    if (params.environment) searchParams.set("environment", params.environment);
+    if (params.since) searchParams.set("since", params.since);
+    if (params.until) searchParams.set("until", params.until);
+    if (params.limit) searchParams.set("limit", String(params.limit));
+    const qs = searchParams.toString();
+    return fetchDjango<EndpointPayloadSample[]>(
+      `/apps/${slug}/analytics/endpoint-payloads${qs ? `?${qs}` : ""}`,
     );
   },
 

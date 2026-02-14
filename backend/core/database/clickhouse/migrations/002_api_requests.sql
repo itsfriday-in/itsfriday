@@ -13,7 +13,9 @@ CREATE TABLE IF NOT EXISTS api_requests (
     request_size UInt64 CODEC(ZSTD(1)),
     response_size UInt64 CODEC(ZSTD(1)),
     ip_address String CODEC(ZSTD(1)),
-    user_agent String CODEC(ZSTD(1))
+    user_agent String CODEC(ZSTD(1)),
+    request_payload String CODEC(ZSTD(3)),
+    response_payload String CODEC(ZSTD(3))
 ) ENGINE = MergeTree()
 PARTITION BY toYYYYMM(timestamp)
 ORDER BY (app_id, environment, method, path, timestamp)

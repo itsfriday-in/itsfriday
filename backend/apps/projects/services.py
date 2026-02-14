@@ -265,6 +265,17 @@ class EnvironmentService:
 
 
 class IngestService:
+    MAX_PAYLOAD_CHARS = 16_384
+
+    @staticmethod
+    def _safe_payload(value: str) -> str:
+        if not value:
+            return ""
+        text = str(value)
+        if len(text) <= IngestService.MAX_PAYLOAD_CHARS:
+            return text
+        return text[: IngestService.MAX_PAYLOAD_CHARS]
+
     @staticmethod
     def ingest(app_id: str, records: list) -> int:
         if not records:
@@ -295,6 +306,8 @@ class IngestService:
                     "response_size": r.response_size,
                     "ip_address": r.ip_address,
                     "user_agent": r.user_agent,
+                    "request_payload": IngestService._safe_payload(r.request_payload),
+                    "response_payload": IngestService._safe_payload(r.response_payload),
                 }
             )
 
@@ -384,6 +397,8 @@ class IngestService:
                     "response_size": r["response_size"],
                     "ip_address": r["ip_address"],
                     "user_agent": r["user_agent"],
+                    "request_payload": r["request_payload"],
+                    "response_payload": r["response_payload"],
                 }
             )
 
@@ -1122,4 +1137,64 @@ class AnalyticsService:
             return client.execute(query, params)
         except Exception as exc:
             logger.warning("ClickHouse query failed for endpoint status-code stats; returning empty list: %s", exc)
+            return []
+
+    @staticmethod
+    def get_endpoint_payloads(
+        app_id: str,
+        method: str,
+        path: str,
+        environment: str | None = None,
+        since: str | None = None,
+        until: str | None = None,
+        limit: int = 20,
+    ) -> list[dict]:
+        from core.database.clickhouse.client import get_clickhouse_client
+
+        try:
+            client = get_clickhouse_client()
+        except Exception as exc:
+            logger.warning("ClickHouse client initialization failed; returning empty endpoint payloads: %s", exc)
+            return []
+
+        since_dt, until_dt = _resolve_time_range(since, until)
+        params = {
+            "app_id": app_id,
+            "method": method.upper(),
+            "path": path,
+            "since": since_dt,
+            "until": until_dt,
+            "limit": max(1, min(limit, 100)),
+        }
+        env_filter = ""
+        if environment:
+            env_filter = "AND environment = %(environment)s"
+            params["environment"] = environment
+
+        query = f"""
+            SELECT
+                timestamp,
+                method,
+                path,
+                status_code,
+                environment,
+                ip_address,
+                user_agent,
+                request_payload,
+                response_payload
+            FROM api_requests
+            WHERE app_id = %(app_id)s
+              AND method = %(method)s
+              AND path = %(path)s
+              AND timestamp >= %(since)s
+              AND timestamp <= %(until)s
+              {env_filter}
+              AND (length(request_payload) > 0 OR length(response_payload) > 0)
+            ORDER BY timestamp DESC
+            LIMIT %(limit)s
+        """
+        try:
+            return client.execute(query, params)
+        except Exception as exc:
+            logger.warning("ClickHouse query failed for endpoint payload samples; returning empty list: %s", exc)
             return []

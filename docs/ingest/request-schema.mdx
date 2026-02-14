@@ -17,6 +17,8 @@ description: 'Field-level schema reference for ingest request telemetry payloads
 | `response_size` | integer | Yes | Response payload bytes |
 | `ip_address` | string | No | Optional source IP |
 | `user_agent` | string | No | Consumer identifier fallback |
+| `request_payload` | string | No | Raw request body sample (truncated server-side) |
+| `response_payload` | string | No | Raw response body sample (truncated server-side) |
 
 ## Batch Envelope
 
@@ -34,6 +36,7 @@ description: 'Field-level schema reference for ingest request telemetry payloads
 - Ensure timestamps are valid ISO-8601
 - Use stable path format for accurate endpoint grouping
 - Ensure status codes are in valid HTTP ranges
+- Payload fields are stored as text and truncated to safe limits
 
 ## Recommended SDK Normalization
 

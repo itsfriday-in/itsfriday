@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type {
   EndpointConsumer,
   EndpointDetail,
+  EndpointPayloadSample,
   EndpointStatusCode,
   EndpointTimeseriesPoint,
 } from "@/lib/api-client";
@@ -45,6 +46,7 @@ export default function EndpointDetailsContent({ appSlug }: EndpointDetailsConte
   const [timeseries, setTimeseries] = useState<EndpointTimeseriesPoint[]>([]);
   const [consumers, setConsumers] = useState<EndpointConsumer[]>([]);
   const [statusCodes, setStatusCodes] = useState<EndpointStatusCode[]>([]);
+  const [payloads, setPayloads] = useState<EndpointPayloadSample[]>([]);
   const [metricMode, setMetricMode] = useState<MetricMode>("requests");
   const [activeBucket, setActiveBucket] = useState(0);
 
@@ -59,9 +61,10 @@ export default function EndpointDetailsContent({ appSlug }: EndpointDetailsConte
           fetch(`/api/apps/${appSlug}/analytics/endpoint-timeseries?${qs}`),
           fetch(`/api/apps/${appSlug}/analytics/endpoint-consumers?${qs}&limit=8`),
           fetch(`/api/apps/${appSlug}/analytics/endpoint-status-codes?${qs}&limit=10`),
+          fetch(`/api/apps/${appSlug}/analytics/endpoint-payloads?${qs}&limit=10`),
         ] as const;
 
-        const [detailResult, tsResult, consumersResult, statusResult] = await Promise.allSettled(requests);
+        const [detailResult, tsResult, consumersResult, statusResult, payloadsResult] = await Promise.allSettled(requests);
 
         if (detailResult.status === "fulfilled" && detailResult.value.ok) {
           setDetail(await detailResult.value.json());
@@ -94,6 +97,9 @@ export default function EndpointDetailsContent({ appSlug }: EndpointDetailsConte
 
         if (statusResult.status === "fulfilled" && statusResult.value.ok) setStatusCodes(await statusResult.value.json());
         else setStatusCodes([]);
+
+        if (payloadsResult.status === "fulfilled" && payloadsResult.value.ok) setPayloads(await payloadsResult.value.json());
+        else setPayloads([]);
       } finally {
         setLoading(false);
       }
@@ -272,6 +278,30 @@ export default function EndpointDetailsContent({ appSlug }: EndpointDetailsConte
               </div>
             ))}
             {statusCodes.length === 0 && <p className="endpoint-empty-note">No status data in this range.</p>}
+          </div>
+        </section>
+      </div>
+
+      <div className="endpoint-details-panels endpoint-details-panels-bottom">
+        <section className="endpoint-panel">
+          <h3>Payload samples</h3>
+          <div className="endpoint-list-rows">
+            {payloads.map((sample, idx) => (
+              <div key={`${sample.timestamp}-${idx}`} className="endpoint-list-row" style={{ display: "block" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
+                  <span>{sample.status_code} · {new Date(sample.timestamp).toLocaleTimeString()}</span>
+                  <strong>{sample.method} {sample.path}</strong>
+                </div>
+                <pre style={{ whiteSpace: "pre-wrap", margin: 0, fontSize: 12, opacity: 0.9 }}>
+{`Request:
+${sample.request_payload || "(empty)"}
+
+Response:
+${sample.response_payload || "(empty)"}`}
+                </pre>
+              </div>
+            ))}
+            {payloads.length === 0 && <p className="endpoint-empty-note">No payload samples captured in this range.</p>}
           </div>
         </section>
       </div>

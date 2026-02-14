@@ -21,10 +21,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const userAgent = request.headers.get("user-agent") || "";
+    const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0].trim()
+      || request.headers.get("x-real-ip")
+      || "unknown";
 
     const response = await fetch(`${DJANGO_API_URL}/auth/verify`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": userAgent,
+        "X-Forwarded-For": clientIp,
+      },
       body: JSON.stringify({
         token: body.token,
         device_info: userAgent.substring(0, 255),

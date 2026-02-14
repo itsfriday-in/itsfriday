@@ -1,0 +1,67 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "apilens"
+version = "0.1.0"
+description = "API Lens Python SDK with OpenTelemetry-based ingest forwarding"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "API Lens", email = "hello@apilens.ai" }
+]
+keywords = ["apilens", "observability", "otel", "opentelemetry", "fastapi", "flask", "django", "starlette", "litestar", "blacksheep"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: System :: Monitoring",
+]
+dependencies = [
+  "opentelemetry-api>=1.25.0",
+  "opentelemetry-sdk>=1.25.0",
+]
+
+[project.optional-dependencies]
+fastapi = [
+  "fastapi>=0.110.0",
+]
+starlette = [
+  "starlette>=0.36.0",
+]
+flask = [
+  "flask>=3.0.0",
+]
+django = [
+  "django>=4.2",
+]
+litestar = [
+  "litestar>=2.0.0",
+]
+blacksheep = [
+  "blacksheep>=2.0.0",
+]
+all = [
+  "fastapi>=0.110.0",
+  "starlette>=0.36.0",
+  "django>=4.2",
+  "flask>=3.0.0",
+  "litestar>=2.0.0",
+  "blacksheep>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://apilens.ai"
+Documentation = "https://apilens.ai"
+Repository = "https://github.com/apilens/apilens"
+
+[tool.hatch.build.targets.wheel]
+packages = ["apilens"]

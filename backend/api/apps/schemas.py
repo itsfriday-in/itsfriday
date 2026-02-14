@@ -207,3 +207,15 @@ class EndpointConsumerResponse(Schema):
 class EndpointStatusCodeResponse(Schema):
     status_code: int
     total_requests: int
+
+
+class EndpointPayloadSampleResponse(Schema):
+    timestamp: datetime
+    method: str
+    path: str
+    status_code: int
+    environment: str
+    ip_address: str
+    user_agent: str
+    request_payload: str
+    response_payload: str
