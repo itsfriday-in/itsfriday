@@ -3,8 +3,8 @@ requires = ["hatchling>=1.25.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "apilens"
-version = "0.1.0"
+name = "apilenss"
+version = "0.1.1"
 description = "API Lens Python SDK with OpenTelemetry-based ingest forwarding"
 readme = "README.md"
 requires-python = ">=3.10"
